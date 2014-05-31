@@ -18,7 +18,8 @@ func main() {
 		things[rune(i)] = i
 	}
 
-	// and print
+	// and print. Interestingly, the order seems to be biased towards sorted
+	// order
 	for character, charCount := range things {
 		fmt.Println(string(character), ":", charCount)
 	}
