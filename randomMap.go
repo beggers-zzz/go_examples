@@ -9,7 +9,7 @@ import "fmt"
 
 func main() {
 
-	things := map[rune]int{} // our demo map
+	things := map[rune]int{} // our demo map--'rune' is go's term for unicode character
 	numChars := 10           // number of characters to print
 	initChar := 60           // character to start on
 
