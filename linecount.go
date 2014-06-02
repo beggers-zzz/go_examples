@@ -18,22 +18,16 @@ import (
 // (which is pretty meaningless, unless you have a weird concept of "meaning").
 
 func main() {
-	// Command-line argument stuff
+	// Command-line argument stuff -- see flags.go
 	verbose := false // whether or not to print all files
 	ext := ""        // filetypes to count
-	flag.StringVar(&ext, "extension", "", "Types of files to count.")
-	flag.BoolVar(&verbose, "verbose", false, "Whether to print every file,"+
+	flag.StringVar(&ext, "ext", "", "Types of files to count.")
+	flag.BoolVar(&verbose, "v", false, "Whether to print every file, "+
 		"instead of just the total.")
 	flag.Parse()
 
-	// Now make sure we only got flags and an arg
-	args := flag.Args()
-	if len(args) != 1 {
-		usage()
-	}
-
 	counts := make(map[string]uint64) // will store the line counts
-	files := []string{args[0]}        // files we still need to deal with
+	files := flag.Args()              // files we still need to deal with
 
 	// keep going until there are no files left to process
 	for len(files) > 0 {
@@ -79,7 +73,9 @@ func main() {
 			// Add them all to our files list
 			for i := 0; i < len(newFiles); i++ {
 				f := newFiles[i]
-				if !strings.HasPrefix(f.Name(), ".") {
+
+				if !strings.HasPrefix(f.Name(), ".") &&
+					(f.IsDir() || strings.HasSuffix(f.Name(), ext)) {
 					files = append(files, curFile+"/"+f.Name())
 				}
 			}
@@ -89,8 +85,11 @@ func main() {
 	// Now print out the newlines per file, and the total
 	total := uint64(0)
 	for file, count := range counts {
-		fmt.Println(file, ":", count)
 		total += count
+		if verbose {
+			fmt.Println(file, ":", count)
+		}
 	}
+
 	fmt.Println("Total:", total)
 }
