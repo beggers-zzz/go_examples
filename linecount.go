@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 // Demonstrates Go's file/directory IO. Takes a command-line argument representing
@@ -22,17 +23,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Make sure the passed file is valid
-	fi, err := os.Stat(os.Args[1])
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
 	counts := make(map[string]uint64) // will store the line counts
-	files := make([]os.FileInfo, 0)   // files we still need to deal with
+	files := make([]string, 0)        // files we still need to deal with
 
-	files = append(files, fi) // set up our file slice with the first file
+	files = append(files, os.Args[1]) // set up our file slice with the first file
 
 	// keep going until there are no files left to process
 	for len(files) > 0 {
@@ -40,31 +34,48 @@ func main() {
 		curFile := files[0]
 		files = files[1:] // and slice it off the list
 
-		if !curFile.IsDir() {
+		// Make sure the file is valid
+		fi, err := os.Stat(curFile)
+		if err != nil {
+			fmt.Println("error on stat", err)
+			os.Exit(1)
+		}
+
+		if !fi.IsDir() {
 			// regular file, open and process
 
-			file, err := ioutil.ReadFile(curFile.Name())
+			// Get all the bytes, and check the validity in the process
+			file, err := ioutil.ReadFile(curFile)
 			if err != nil {
-				fmt.Println("Got error:", err)
+				fmt.Println(err)
 				os.Exit(1)
 			}
 
-			counts[curFile.Name()] = 1
+			// count the newlines in the file
+			counts[curFile] = 1
 			for i := 0; i < len(file); i++ {
 				if file[i] == '\n' {
-					counts[curFile.Name()]++
+					counts[curFile]++
 				}
 			}
 
 		} else {
 			// Directory, add all the files from it to our list
-			newFiles, err := ioutil.ReadDir(curFile.Name())
+
+			// Get all the subFiles, and check the validity
+			newFiles, err := ioutil.ReadDir(curFile)
 			if err != nil {
-				fmt.Println("Got error:", err)
+				fmt.Println(err)
 				os.Exit(1)
 			}
 
-			files = append(files, newFiles...)
+			// Add them all to our files list
+			for i := 0; i < len(newFiles); i++ {
+				f := newFiles[i]
+				if !strings.HasPrefix(f.Name(), ".") {
+					files = append(files, curFile+"/"+f.Name())
+				}
+			}
 		}
 	}
 
