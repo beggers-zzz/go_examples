@@ -77,6 +77,7 @@ func main() {
 				if !strings.HasPrefix(f.Name(), ".") &&
 					(f.IsDir() || strings.HasSuffix(f.Name(), ext)) {
 					// only add files if they're a directory, or have our extension
+					// (and aren't dotfiles)
 					files = append(files, curFile+"/"+f.Name())
 				}
 			}
