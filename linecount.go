@@ -4,6 +4,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -17,16 +18,22 @@ import (
 // (which is pretty meaningless, unless you have a weird concept of "meaning").
 
 func main() {
-	if len(os.Args) != 2 {
-		// Silly user
-		fmt.Println("Usage:", os.Args[0], "FILE_OR_DIR_NAME")
-		os.Exit(1)
+	// Command-line argument stuff
+	verbose := false // whether or not to print all files
+	ext := ""        // filetypes to count
+	flag.StringVar(&ext, "extension", "", "Types of files to count.")
+	flag.BoolVar(&verbose, "verbose", false, "Whether to print every file,"+
+		"instead of just the total.")
+	flag.Parse()
+
+	// Now make sure we only got flags and an arg
+	args := flag.Args()
+	if len(args) != 1 {
+		usage()
 	}
 
 	counts := make(map[string]uint64) // will store the line counts
-	files := make([]string, 0)        // files we still need to deal with
-
-	files = append(files, os.Args[1]) // set up our file slice with the first file
+	files := []string{args[0]}        // files we still need to deal with
 
 	// keep going until there are no files left to process
 	for len(files) > 0 {
