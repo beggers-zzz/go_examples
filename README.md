@@ -10,3 +10,4 @@ Filename | Purpose
 ---------|--------
 randomMap.go | demonstrates Go's randomized map iteration
 concurrency.go | goroutines are so easy!
+flags.go | Go makes parsing command-line flags a breeze
